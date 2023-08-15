@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import {SafeAreaView, Text, StyleSheet} from 'react-native';
+import {SafeAreaView, Text, StyleSheet, Linking, Button} from 'react-native';
+import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 import {WebView} from 'react-native-webview';
 
@@ -27,18 +28,48 @@ const html = `
 `;
 
 function App() {
+  async function openUrl(url) {
+    if (await InAppBrowser.isAvailable()) {
+      InAppBrowser.open(url, {
+        // iOS Properties
+        dismissButtonStyle: 'cancel',
+        preferredBarTintColor: '#453AA4',
+        preferredControlTintColor: 'white',
+        readerMode: false,
+        animated: true,
+        modalEnabled: true,
+        // Android Properties
+        showTitle: true,
+        toolbarColor: '#6200EE',
+        secondaryToolbarColor: 'black',
+        enableUrlBarHiding: true,
+        enableDefaultShare: true,
+        forceCloseOnRedirection: false,
+        // Animation
+        animations: {
+          startEnter: 'slide_in_right',
+          startExit: 'slide_out_left',
+          endEnter: 'slide_in_left',
+          endExit: 'slide_out_right',
+        },
+      });
+    } else {
+      Linking.openURL(url);
+    }
+  }
+
   const runFirst = `
       const backButton = document.querySelector("#open-pref")
       backButton.addEventListener('click', function(e){
         e.preventDefault()
         e.stopPropagation()
-        window.alert('Mega empanada: ' + backButton.href)  
+        window.ReactNativeWebView.postMessage(backButton.href); // Send the URL to React Native
       })
       true; // note: this is required, or you'll sometimes get silent failures
     `;
   return (
     <SafeAreaView style={{flex: 1}}>
-      <Text>POC new 1.1</Text>
+      <Text>POC React Native CLI - Webview</Text>
       <WebView
         originWhitelist={['*']}
         style={styles.webview}
@@ -46,6 +77,11 @@ function App() {
           html,
         }}
         injectedJavaScript={runFirst}
+        onMessage={event => {
+          if (event.nativeEvent.data) {
+            openUrl(event.nativeEvent.data);
+          }
+        }}
       />
     </SafeAreaView>
   );
