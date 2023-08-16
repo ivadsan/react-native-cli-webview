@@ -5,8 +5,8 @@
  * @format
  */
 
-import React from 'react';
-import {SafeAreaView, Text, StyleSheet, Linking, Button} from 'react-native';
+import React, {useEffect} from 'react';
+import {SafeAreaView, Text, StyleSheet, Linking} from 'react-native';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 import {WebView} from 'react-native-webview';
@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
     borderWidth: 5,
-    borderColor: '#00FF00',
+    borderColor: '#00b1ea',
   },
 });
 
@@ -23,24 +23,32 @@ const html = `
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <body style="display:flex; flex-direction: column; flex: 1; justify-content: center; align-items: center; cursor: pointer">
     <h1>WebView</h1>
-    <a id="open-pref" style="text-align: center; background: lightblue; text-decoration: none; padding: 8px; border-radius: 8px; font-weight: bold" href="https://www.mercadopago.com.ar/checkout/v1/redirect?preference-id=239658604-49220b41-cdfe-4dd0-b41c-bf806e95ed3c&device-override=mobile">Open preference</a>
+    <a id="open-pref" style="text-align: center; background: #00b1ea; text-decoration: none; padding: 8px; border-radius: 8px; font-weight: bold; color: white" href="https://www.mercadopago.com.ar/checkout/v1/redirect?preference-id=239658604-73c9a865-0538-4a7e-b656-297faa9470a8&device-override=mobile">Open preference</a>
   </body>
 `;
 
 function App() {
+  useEffect(() => {
+    Linking.addEventListener('url', event => {
+      const {url} = event;
+      if (url !== null && url.includes('iosapp://')) {
+        InAppBrowser.close();
+      }
+    });
+  }, []);
   async function openUrl(url) {
     if (await InAppBrowser.isAvailable()) {
       InAppBrowser.open(url, {
         // iOS Properties
         dismissButtonStyle: 'cancel',
-        preferredBarTintColor: '#453AA4',
+        preferredBarTintColor: '#00b1ea',
         preferredControlTintColor: 'white',
         readerMode: false,
         animated: true,
         modalEnabled: true,
         // Android Properties
         showTitle: true,
-        toolbarColor: '#6200EE',
+        toolbarColor: '#00b1ea',
         secondaryToolbarColor: 'black',
         enableUrlBarHiding: true,
         enableDefaultShare: true,
